@@ -1,4 +1,4 @@
-"""Классическая игра Змейка (ver. 3.0).
+"""Классическая игра Змейка (ver. 3.1).
 
 В игре реализованы следующие возможности:
 -отрисованы линии границ каждой ячейки игрового поля, с разлинееным полем игра
@@ -28,6 +28,7 @@
 import pygame
 from random import choice, randint
 from typing import Optional
+from snake_brain import SnakeBrain, NoCellException
 
 # Инициализация PyGame
 pygame.init()
@@ -374,6 +375,11 @@ def main():  # noqa: C901
 
     print('\nStart new game.')
 
+    # Определяем brain
+    brain = SnakeBrain(snake, apple,
+                       GRID_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT,
+                       wrong)
+
     while True:
         # Устанавливаем скорость игры
         clock.tick(SPEED)
@@ -381,12 +387,15 @@ def main():  # noqa: C901
         # Обрабатываем действие пользователя
         try:
             handle_keys(snake)
+            brain.next_step(snake, apple, wrong)
         except GameQuitError as e:
             print(e)
             pygame.quit()
             break
         except NoDirectionError as e:
             print(f'Ошибка: {e}')
+        except NoCellException as e:
+            print(e)
 
         # Перемещаю змейку
         snake.update_direction()
@@ -410,11 +419,14 @@ def main():  # noqa: C901
             snake.length += 1
             apple.randomize_position(used_positions)
             apple.draw(screen, border_color=FG_COLOR)
+            brain.set_target(snake, apple, wrong)
         elif WRONG_EAT and snake.get_head_position() == wrong.position:
             if snake.length > 1:
                 snake.downsizing(screen)
                 wrong.randomize_position(used_positions)
                 wrong.draw(screen, border_color=FG_COLOR)
+                brain.food_scanner_up()
+                brain.set_target(snake, apple, wrong)
             else:
                 snake.in_game = False
 
@@ -431,17 +443,20 @@ def main():  # noqa: C901
             screen.fill(BOARD_BACKGROUND_COLOR)
             snake.reset()
             apple.randomize_position(snake.positions)
+            brain.reset(snake, apple, wrong)
             apple.draw(screen, border_color=FG_COLOR)
 
             # Если включена неправильная еда
             if WRONG_EAT:
                 wrong.randomize_position(snake.positions)
+                brain.reset(snake, apple, wrong)
                 wrong.draw(screen, border_color=FG_COLOR)
 
             snake.in_game = True
 
         # Перерисовываю змейку
         snake.draw(screen, border_color=FG_COLOR)
+
         # Перерисовываю линии разметки поля и окно игры
         draw_lines()
         pygame.display.update()
