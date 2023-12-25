@@ -1,4 +1,4 @@
-"""Классическая игра Змейка.
+"""Классическая игра Змейка (ver. 3.0).
 
 В игре реализованы следующие возможности:
 -отрисованы линии границ каждой ячейки игрового поля, с разлинееным полем игра
@@ -47,7 +47,7 @@ RIGHT: tuple = (1, 0)
 
 # Словарь используется для смены движения змейки,
 # в нём описаны все возможные изменения направления.
-# (<нажатая кнопка>, <текущее направление>): <норвое направление>
+# (<нажатая кнопка>, <текущее направление>): <новое направление>
 direction_dict: dict = {
     (pygame.K_UP, LEFT): UP,
     (pygame.K_UP, RIGHT): UP,
@@ -123,7 +123,7 @@ clock: pygame.time.Clock = pygame.time.Clock()
 
 
 # Тут опишите все классы игры
-class GameQuitError(KeyError):
+class GameQuitError(Exception):
     """Класс для обработки исключения при закрытии окна игры."""
 
     def __str__(self) -> str:
@@ -131,8 +131,8 @@ class GameQuitError(KeyError):
         return 'Выход из игры по требованию пользователя.'
 
 
-class NoDirectionError(KeyError):
-    """Класс для обработки имключения при смене направления движения змейки."""
+class NoDirectionError(Exception):
+    """Класс для обработки исключения при смене направления движения змейки."""
 
     def __str__(self) -> str:
         """Исключение при невозможности сменить направление змейки."""
@@ -287,17 +287,16 @@ class Snake(GameObject):
         # с ним буквально на фрейм, то затрется один блок, и будет черным.
         # Поэтому оставляю перерисовку всей змейки, с головой.
         for position in self.positions[:-1]:
-            GameObject.draw(self, surface, position,
-                            self.body_color, border_color)
+            super().draw(surface, position,
+                         self.body_color, border_color)
 
         # Отрисовка головы змейки
-        GameObject.draw(self, surface, self.positions[0],
-                        self.body_color, border_color)
+        super().draw(surface, self.positions[0], self.body_color, border_color)
 
         # Затирание последней ячейки
         if self.last:
-            GameObject.draw(self, surface, self.last,
-                            BOARD_BACKGROUND_COLOR)
+            super().draw(surface, self.last,
+                         BOARD_BACKGROUND_COLOR)
 
     def get_head_position(self) -> tuple:
         """Возвращает позицию головы змейки."""
@@ -308,8 +307,8 @@ class Snake(GameObject):
         erase_position = self.positions.pop()
         self.length -= 1
         # Затираю последнюю ячейку
-        GameObject.draw(self, surface, erase_position,
-                        BOARD_BACKGROUND_COLOR)
+        super().draw(surface, erase_position,
+                     color=BOARD_BACKGROUND_COLOR)
 
 
 def handle_keys(game_object) -> None:
