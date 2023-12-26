@@ -90,7 +90,7 @@ class SnakeBrain():
     """Класс реализует самостоятельное движение Змейки."""
 
     # Уровень пищевого сканера Змейки
-    food_scanner: int = 5
+    food_scanner: int = 1
 
     def __init__(self, snake, apple, grid_size, screen_width,
                  screen_height, wrong=None) -> None:
@@ -103,7 +103,7 @@ class SnakeBrain():
         # Инициализация Змеи
         self._snake_positions: list = snake.positions
         self._snake_direction: tuple = snake.direction
-        self._snake_get_head = snake.get_head_position  # Func
+        self._snake_head = snake.get_head_position()
 
         # Инициализация яблока
         self._apple_position: tuple = apple.position
@@ -125,6 +125,7 @@ class SnakeBrain():
         # Обновление Змейки
         self._snake_positions = snake.positions
         self._snake_direction = snake.direction
+        self._snake_head = snake.get_head_position()
 
         # Обновление яблока
         self._apple_position = apple.position
@@ -178,19 +179,15 @@ class SnakeBrain():
         steps: list = []
         # Напавление прямо UP, влево LEFT, вправо RIGHT
         for current in [UP, LEFT, RIGHT]:
-            direction = route_map.get((self._snake_direction, current), ())
-            if not direction:
-                print(f'_snake_direction={self._snake_direction} current={current}')
+            direction = route_map.get((self._snake_direction, current))
+            if direction is not None:
+                steps.append(self._step_coord(head, direction))
+            else:
+                print(f'_snake_direction={self._snake_direction} '
+                      f'current={current}')
                 raise NoRouteException
-            steps.append(self._step_coord(head, direction))
-        print(steps)
 
-        # Исключаю переход через границы экрана
-        for step in steps:
-            if abs(head[0] - step[0]) > self._grid_size:
-                steps.remove(step)
-            if abs(head[1] - step[1]) > self._grid_size:
-                steps.remove(step)
+        # print(f'steps={steps}')
 
         # Занятые ячейки на поле
         if self._wrong:
@@ -215,16 +212,15 @@ class SnakeBrain():
 
     def next_step(self, snake, apple, wrong=None) -> None:
         """Определяет следующий шаг Змейки."""
+        # Обновление параметров игрового поля
         self.update(snake, apple, wrong)
 
-        # Текущая позиция головы
-        head: tuple = self._snake_get_head()
-
         # Список возможных для движения ячеек
-        possible_steps: set = self._get_possible_steps(head)
+        possible_steps: set = self._get_possible_steps(self._snake_head)
 
         # Логика выбора направления к цели
-        next: list = list(possible_steps)[0]
+        # ТУТ МОЖНО ЧОЙС(поссиблстепс) и ниже уже НЕ [1:]будет
+        next: tuple = tuple(possible_steps)[0]
         for step in list(possible_steps)[1:]:
             use_x: bool = (
                 abs(step[0] - self.target[0]) < abs(next[0] - self.target[0])
@@ -236,13 +232,27 @@ class SnakeBrain():
             if any([use_x, use_y]):
                 next = step
 
-        # Выбранная позиция для движения
-        next_position: list = next
+        # Координаты целевой ячейки для движения
+        next_cell: list = list(next)
 
-        # Перевод выбранной позиции в направление
-        next_direction: list = [
-            (next_position[0] - head[0]) // self._grid_size,
-            (next_position[1] - head[1]) // self._grid_size
-        ]
-        # print(self.target, tuple(next_direction), possible_steps)
-        snake.next_direction = tuple(next_direction)
+        # Разница между координатами в ячейках
+        dx_cells = (next_cell[0] - self._snake_head[0]) // self._grid_size
+        dy_cells = (next_cell[1] - self._snake_head[1]) // self._grid_size
+
+        # Если змейка достигает границы, корректирую координаты
+        grid_width = self._screen_width // self._grid_size
+        grid_height = self._screen_height // self._grid_size
+
+        if abs(dx_cells) == grid_width - 1:
+            dx_cells //= -(grid_width - 1)
+
+        if abs(dy_cells) == grid_height - 1:
+            dy_cells //= -(grid_height - 1)
+
+        # Направление
+        direction = (dx_cells, dy_cells)
+
+        # print(f'target={self.target} direction={tuple(direction)} '
+        #       f'possible={possible_steps} next_cell={next_cell} '
+        #       f'head={head}')
+        snake.next_direction = tuple(direction)

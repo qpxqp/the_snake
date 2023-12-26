@@ -80,7 +80,7 @@ BOARD_BACKGROUND_COLOR: tuple = (0, 0, 0)  # ТЗ, тёмная тема
 # BOARD_BACKGROUND_COLOR = (200, 200, 200)  # Светлая тема
 
 # Скорость движения змейки
-SPEED: int = 12  # ТЗ
+SPEED: int = 20  # ТЗ
 # SPEED = 12  # Альтернативный
 
 # Цвет линий игрового поля
@@ -181,11 +181,13 @@ class GameObject:
             rect = pygame.Rect(
                 (self.position[0], self.position[1]), (GRID_SIZE, GRID_SIZE)
             )
+
         # Закрашиваю ячейку указанным цветом, либо цветом self.body_color
         if color:
             pygame.draw.rect(surface, color, rect)
         else:
             pygame.draw.rect(surface, self.body_color, rect)
+
         # Если требуется, закрашиваю границы ячейки
         if border_color:
             pygame.draw.rect(surface, border_color, rect, 1)
@@ -216,6 +218,11 @@ class Apple(GameObject):
             if random_position not in positions:
                 break
         self.position = random_position
+
+        # # Для дебага
+        # position = (0, 460)
+        # if not isinstance(self, Wrong) and position not in positions:
+        #     self.position = position
 
 
 class Wrong(Apple):
