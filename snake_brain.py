@@ -1,6 +1,6 @@
 # snake_brain.py
 
-"""Мозги Питона. (ver. 1.0)
+"""Мозги Питона. (ver. 1.1)
 
 Данный модуль описывает всё для самостоятельной охоты Змейки.
 Основной код игры the_snake.py должен работать корректно, в основном
@@ -90,7 +90,7 @@ class SnakeBrain():
     """Класс реализует самостоятельное движение Змейки."""
 
     # Уровень пищевого сканера Змейки
-    food_scanner: int = 1
+    food_scanner: int = 5
 
     def __init__(self, snake, apple, grid_size, screen_width,
                  screen_height, wrong=None) -> None:
@@ -254,5 +254,5 @@ class SnakeBrain():
 
         # print(f'target={self.target} direction={tuple(direction)} '
         #       f'possible={possible_steps} next_cell={next_cell} '
-        #       f'head={head}')
+        #       f'head={self._snake_head}')
         snake.next_direction = tuple(direction)
