@@ -1,6 +1,6 @@
 # snake_brain.py
 
-"""Мозги Питона. (ver. 1.1)
+"""Мозги Питона. (ver. 1.2)
 
 Данный модуль описывает всё для самостоятельной охоты Змейки.
 Основной код игры the_snake.py должен работать корректно, в основном
@@ -119,6 +119,12 @@ class SnakeBrain():
         self.set_target(snake, apple, wrong)
 
         print(f'brain: Activate. Food scanner level {self.food_scanner}.')
+
+    def __str__(self) -> str:
+        """Информация об объекте класса."""
+        doc_str = f'Default food_scanner = {self.food_scanner}'
+        # Теперь если вызвать print(<объект класса>) - то увидим эту инфу
+        return doc_str
 
     def update(self, snake, apple, wrong=None) -> None:
         """Обновление параметров игры."""

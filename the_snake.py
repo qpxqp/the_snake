@@ -372,6 +372,7 @@ def main():  # noqa: C901
 
     # Определяем основные игровые объекты
     snake = Snake()
+    snake.draw(screen, border_color=FG_COLOR)
     apple = Apple()
     apple.draw(screen, border_color=FG_COLOR)
 
