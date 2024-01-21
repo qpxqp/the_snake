@@ -1,4 +1,4 @@
-"""Классическая игра Змейка (ver. 3.2).
+"""Классическая игра Змейка (ver. 3.3).
 
 В игре реализованы следующие возможности:
 -отрисованы линии границ каждой ячейки игрового поля, с разлинееным полем игра
@@ -203,9 +203,9 @@ class Apple(GameObject):
     # Цвет яблока
     body_color = APPLE_COLOR
 
-    def __init__(self):
+    def __init__(self, positions: list = []):
         super().__init__()
-        self.randomize_position()
+        self.randomize_position(positions)
 
     def randomize_position(self, positions: list = []) -> None:
         """Выбирает случайную не занятую ячейку на игровом поле."""
@@ -234,8 +234,8 @@ class Wrong(Apple):
     # Цвет неправильной еды
     body_color = WRONG_COLOR
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, positions: list = []):
+        super().__init__(positions)
 
 
 class Snake(GameObject):
@@ -373,12 +373,14 @@ def main():  # noqa: C901
     # Определяем основные игровые объекты
     snake = Snake()
     snake.draw(screen, border_color=FG_COLOR)
-    apple = Apple()
+    apple = Apple(snake.positions)
     apple.draw(screen, border_color=FG_COLOR)
 
     # Добавляем при необходимости неправильную еду
     if WRONG_EAT:
-        wrong = Wrong()
+        used_positions = get_used_positions(snake.positions,
+                                            apple.position)
+        wrong = Wrong(used_positions)
         wrong.draw(screen, border_color=FG_COLOR)
 
     print('\nStart new game.')
